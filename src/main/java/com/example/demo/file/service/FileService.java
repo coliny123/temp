@@ -25,13 +25,13 @@ public class FileService {
 
     /***
      * 파일 업로드, DB에 파일 정보 저장 영역
-     * @param files
+     * @param recivedfile
      * @throws IOException
      */
-    public void fileUpload(MultipartFile files) throws IOException{
+    public void fileUpload(MultipartFile recivedfile) throws IOException{
         try {
             // 업로더가 업로드한 file 이름
-            String originalFilename = files.getOriginalFilename();
+            String originalFilename = recivedfile.getOriginalFilename();
 
             // uuid 식별자 붙힌 file 이름
             String saveFileName = createSavedFileName(originalFilename);
@@ -39,20 +39,30 @@ public class FileService {
             // file이 로컬storage에 저장되는 경로(위치) -> cloud flare로 바꿀 예정
             String savedPath = getFullPath(saveFileName);
 
-            // 파라미터로 java.io.File 객체를 받아 해당 위치에 파일을 저장
-            files.transferTo(new File(savedPath));
+            // 파라미터로 java.io.File 객체를 받아 해당 위치에 파일을 저장!!!!!
+            recivedfile.transferTo(new File(savedPath));
 
             // 로컬storage에 저장 된 file의 정보 db에 저장
-            FileInfo fileInfo = FileInfo.builder()
-                    .savedFileName(saveFileName)
-                    .originalFileName(originalFilename)
-                    .savedPath(savedPath)
-                    .build();
-            fileRepository.save(fileInfo);
+            recodeFileInfoToDB(originalFilename, saveFileName, savedPath);
 
         }catch (Exception e){
             throw new IOException("파일 업로드 중 에러가 발생했습니다.");
         }
+    }
+
+    /***
+     * 로컬storage에 저장 된 file의 정보 db에 저장
+     * @param originalFilename
+     * @param savedFileName
+     * @param savedPath
+     */
+    private void recodeFileInfoToDB(String originalFilename, String savedFileName, String savedPath){
+        FileInfo fileInfo = FileInfo.builder()
+                .savedFileName(savedFileName)
+                .originalFileName(originalFilename)
+                .savedPath(savedPath)
+                .build();
+        fileRepository.save(fileInfo);
     }
 
     /***
