@@ -1,4 +1,4 @@
-spring.servlet.multipart.max-file-size=100MB
+spring.servlet.multipart.max-file-size=10MB
 spring.servlet.multipart.max-request-size=1000MB
 
 upload.path = D:/storage/
@@ -10,3 +10,6 @@ spring.datasource.password=dh990921
 spring.jpa.show-sql=true
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.properties.hibernate.format_sql=true
+
+
+spring.profiles.include=cloudflare
