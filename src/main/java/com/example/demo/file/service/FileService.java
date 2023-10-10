@@ -12,4 +12,6 @@ public interface FileService {
     // 확장자 변환 메소드
 
     //
+
+
 }
