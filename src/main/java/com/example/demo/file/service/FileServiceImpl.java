@@ -1,12 +1,15 @@
 package com.example.demo.file.service;
 
 
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.example.demo.file.domain.entity.FileInfo;
 import com.example.demo.file.repository.FileRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -15,13 +18,17 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class FileServiceImpl implements FileService{
 
     @Value("${upload.path}")
     private String uploadPath;
 
+    @Value("${R2.BUCKET_NAME}")
+    private String bucketName;
+
     private final FileRepository fileRepository;
+    private final AmazonS3Client amazonS3Client;
+
 
     /***
      * 파일 업로드, DB에 파일 정보 저장 영역
@@ -30,7 +37,6 @@ public class FileServiceImpl implements FileService{
      */
     @Override
     public void fileUpload(MultipartFile recivedfile) throws IOException{
-        try {
             // 업로더가 업로드한 file 이름
             String originalFilename = recivedfile.getOriginalFilename();
 
@@ -40,14 +46,16 @@ public class FileServiceImpl implements FileService{
             // file이 로컬storage에 저장되는 경로(위치) -> cloud flare로 바꿀 예정
             String savedPath = getFullPath(saveFileName);
 
+            File file = new File(savedPath);
             // 파라미터로 java.io.File 객체를 받아 해당 위치에 파일을 저장!!!!!
-            recivedfile.transferTo(new File(savedPath));
+            recivedfile.transferTo(file);
 
-            // 로컬storage에 저장 된 file의 정보 db에 저장
-            recodeFileInfoToDB(originalFilename, saveFileName, savedPath);
-
+//            // 로컬storage에 저장 된 file의 정보 db에 저장
+//            recodeFileInfoToDB(originalFilename, saveFileName, savedPath);
+        try {
+            PutObjectResult result = amazonS3Client.putObject(new PutObjectRequest(bucketName, saveFileName, file));
         }catch (Exception e){
-            throw new IOException("파일 업로드 중 에러가 발생했습니다.");
+            throw new IOException("amazonS3Client 에러가 발생했습니다.");
         }
     }
 

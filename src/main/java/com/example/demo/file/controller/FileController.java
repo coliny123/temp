@@ -1,6 +1,7 @@
 package com.example.demo.file.controller;
 
 import com.example.demo.file.service.FileService;
+import com.example.demo.file.service.FileServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,12 +13,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@CrossOrigin(originPatterns = "*")
 @RestController
 @RequiredArgsConstructor
 public class FileController {
 
-    private final FileService fileService;
+    private final FileServiceImpl fileService;
 
     @PostMapping("/upload")
     public ResponseEntity upload(@RequestParam("file") MultipartFile file) {
